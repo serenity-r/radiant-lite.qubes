@@ -136,7 +136,6 @@ if (opt$file != "") {
         datasetlist = c(tbl_name)
     )
     r_data[[tbl_name]] = tbl_df(read.csv(opt$file))	# Right now, no error checking
-    str(tbl_name)
 }
 
 if (opt$type == "shiny") {
