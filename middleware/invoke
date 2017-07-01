@@ -6,7 +6,6 @@
     -u R-3.4.0 \
     -u rstudio-server-1.0.143 \
     -u wrwroxy-0.1 \
-    -u wrapprun-0.1 \
     -w "none" \
     -c "xview -fullscreen -onroot @tool/data/draft-logo-small-color.png" \
     -c "wrwroxy --listenHost 0.0.0.0 --listenPort 8000 --forwardHost 127.0.0.1 --forwardPort 8001 --stream-log --logfile /dev/null" \
