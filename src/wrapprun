@@ -7,6 +7,7 @@ library(rmarkdown)
 library(optparse)
 library(utils)
 library(tools)
+library(dplyr)
 
 # Pandoc needs a UTF-8 locale?
 Sys.setenv(LC_ALL="en_US.UTF-8")
@@ -128,10 +129,14 @@ if (opt$type == "") {
 }
 
 if (opt$file != "") {
+    tbl_name <- opt$file %>% 
+                  {basename(.)} %>% 
+                  {file_path_sans_ext(.)}
     r_data <- list(
-        datasetlist = c(opt$file)
+        datasetlist = c(tbl_name)
     )
-    r_data[[basename(opt$file)]] = read.csv(opt$file)	# Right now, no error checking
+    r_data[[tbl_name]] = tbl_df(read.csv(opt$file))	# Right now, no error checking
+    str(tbl_name)
 }
 
 if (opt$type == "shiny") {
