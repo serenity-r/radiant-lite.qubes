@@ -1,0 +1,138 @@
+#!/usr/bin/env Rscript
+# vim: set syntax=r:
+
+library(methods)
+library(shiny)
+library(rmarkdown)
+library(optparse)
+library(utils)
+library(tools)
+
+# Pandoc needs a UTF-8 locale?
+Sys.setenv(LC_ALL="en_US.UTF-8")
+Sys.setenv(LANG="en_US.UTF-8")
+Sys.setenv(LANGUAGE="en_US.UTF-8")
+
+launchShiny <- function(app_path,host,port) {
+
+    # check to see if app is a file or directory.
+    #
+    # if it is a file, we assume it includes both server and ui of
+    # the Shiny application.
+    #
+    # if it is a directory, we assume it contains a server.R file
+    # and either ui.R or www/index.html
+
+    if (file_test("-f",app_path)) {
+        # app_path is a file
+        app <- shinyAppFile(app_path)
+    } else if (file_test("-d",app_path)) {
+        # app_path is a directory with a server.R and either
+        # ui.R or www/index.html
+        app <- shinyAppDir(app_path)
+    } else {
+        # invalid app_path
+        app <- NULL
+        cat("Invalid app_path: \"",app_path,
+            "\" should be a file with a Shiny application or",
+            " a directory with a server.R and either ui.R or",
+            " www/index.html\n")
+    }
+
+    # run the Shiny application
+    shiny::runApp(
+        appDir = app,
+        host=host,
+        port=port,
+        launch.browser = FALSE
+    )
+}
+
+launchRMarkdown <- function(rmdFile,host,port) {
+
+    # render the RMarkdown file
+    rmarkdown::run(
+        rmdFile,
+        shiny_args = list(
+            host=opt$host,
+            port=opt$port,
+            launch.browser=FALSE
+        )
+    )
+}
+
+usage = "Usage: %prog [options] <filepath>\n"
+description = "Weber R APP RUNner - launch Shiny and RMarkdown applications"
+option_list = list(
+    make_option(c("--host"), type="character", default="0.0.0.0",
+                help="the host ip", metavar="character"),
+    make_option(c("--port"), type="integer", default=8000,
+                help="the port", metavar="number"),
+    make_option(c("--type"), type="character", default="",
+                help="type of R app to run: \"shiny\" or \"rmarkdown\"",
+                metavar="type")
+);
+epilogue = paste(
+    "Examples:\n",
+    "\n1. Launch a Shiny application, app.R, on localhost:8000",
+    "using filename extension to determine application type:\n",
+    "%prog app.R\n",
+    "",
+    "\n2. Launch a Shiny application directory, my_app/,",
+    "on localhost:8000 using filename extension to determine",
+    "application type:\n",
+    "%prog my_app\n",
+    "",
+    "\n3. Launch an RMarkdown application, report.Rmd,",
+    "on localhost:8000 using filename extension to determine",
+    "application type:\n",
+    "%prog report.Rmd\n",
+    "",
+    "\n4. Launch a Shiny application, app.R, explicitly listing",
+    "on host, port, and application type:\n",
+    "%prog --host 0.0.0.0 --port 8000 --type shiny app.R\n",
+    "",
+    "\n5. Launch an RMarkdown application, report.Rmd,",
+    "explicitly listing on host, port, and application type:\n",
+    "%prog --host 0.0.0.0 --port 8000 --type rmarkdown report.Rmd\n"
+)
+
+opt_parser = OptionParser(usage = usage,
+                          option_list = option_list,
+                          description = description,
+                          epilogue = epilogue);
+arguments = parse_args(opt_parser, positional_arguments = 1);
+opt = arguments$options
+app_path = arguments$args
+
+# check if the user specified an application type
+if (opt$type == "") {
+    # try to set the appType by looking at file extensions
+    if (file_test("-f",app_path)) {
+        ext = file_ext(app_path)
+        if (ext == "R") {
+            opt$type <- "shiny"
+        } else if (ext == "Rmd") {
+            opt$type <- "rmarkdown"
+        } else {
+            # check for error below
+        }
+    } else if (file_test("-d",app_path)) {
+        opt$type <- "shiny"
+    } else {
+        # check for error below
+    }
+}
+
+if (opt$type == "shiny") {
+    # launch a Shiny application
+    launchShiny(app_path,opt$host,opt$port)
+} else if (opt$type == "rmarkdown") {
+    # launch an RMarkdown site
+    launchRMarkdown(app_path,opt$host,opt$port)
+} else {
+    # raise error if appType is still not populated
+    cat("Error while guessing --type flag based on \"",
+        app_path, "\" file extension and type. Try setting",
+        " the flag to either \"shiny\" or \"rmarkdown\"\n")
+}
