@@ -70,7 +70,10 @@ option_list = list(
                 help="the port", metavar="number"),
     make_option(c("--type"), type="character", default="",
                 help="type of R app to run: \"shiny\" or \"rmarkdown\"",
-                metavar="type")
+                metavar="type"),
+    make_option(c("--file"), type="character", default="",
+                help="datafile to load",
+                metavar="character")
 );
 epilogue = paste(
     "Examples:\n",
@@ -122,6 +125,13 @@ if (opt$type == "") {
     } else {
         # check for error below
     }
+}
+
+if (opt$file != "") {
+    r_data <- list(
+        datasetlist = c(opt$file)
+    )
+    r_data[[basename(opt$file)]] = read.csv(opt$file)	# Right now, no error checking
 }
 
 if (opt$type == "shiny") {
