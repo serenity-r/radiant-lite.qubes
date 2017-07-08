@@ -9,5 +9,5 @@
     -w "none" \
     -c "xview -fullscreen -onroot @tool/data/draft-logo-small-color.png" \
     -c "wrwroxy --listenHost 0.0.0.0 --listenPort 8000 --forwardHost 127.0.0.1 --forwardPort 8001 --stream-log --logfile /dev/null" \
-    -C "@tool/bin/wrapprun --host 0.0.0.0 --port 8001 --type shiny --file @@file(#1) \${R_INSTALL_DIR}/lib/R/library/serenity/app" \
-    -C "@tool/bin/wrapprun --host 0.0.0.0 --port 8001 --type shiny \${R_INSTALL_DIR}/lib/R/library/serenity/app"
+    -C "@tool/bin/wrapprun --host 0.0.0.0 --port 8001 --type shiny --file @@file(#1) /apps/share64/debian7/R/3.4.0/lib/R/library/serenity/app" \
+    -C "@tool/bin/wrapprun --host 0.0.0.0 --port 8001 --type shiny /apps/share64/debian7/R/3.4.0/lib/R/library/serenity/app"
