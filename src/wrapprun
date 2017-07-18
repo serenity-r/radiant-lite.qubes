@@ -129,13 +129,20 @@ if (opt$type == "") {
 }
 
 if (opt$file != "") {
-    tbl_name <- opt$file %>% 
-                  {basename(.)} %>% 
-                  {file_path_sans_ext(.)}
-    r_data <- list(
-        datasetlist = c(tbl_name)
-    )
-    r_data[[tbl_name]] = tbl_df(read.csv(opt$file))	# Right now, no error checking
+    ext <- opt$file %>%
+             {file_ext(.)} %>%
+             {tolower(.)}
+    if (ext == "csv") {
+        tbl_name <- opt$file %>% 
+                      {basename(.)} %>% 
+                      {file_path_sans_ext(.)}
+        r_data <- list(
+            datasetlist = c(tbl_name)
+        )
+        r_data[[tbl_name]] = tbl_df(read.csv(opt$file))	# Right now, no error checking
+    } else if (ext == "rda") {
+        load(opt$file)
+    }
 }
 
 if (opt$type == "shiny") {
